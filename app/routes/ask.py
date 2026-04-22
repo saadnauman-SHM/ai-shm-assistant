@@ -1,10 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.schemas.request import QuestionRequest
 from app.services.llm_service import query
 
-router = APIRouter()   # 👈 THIS LINE IS CRITICAL
+router = APIRouter()
 
 @router.post("/ask")
 def ask(request: QuestionRequest):
-    result = query(request.question)
-    return {"answer": result["generated_text"]}
+    try:
+        result = query(request.question)
+
+        return {
+            "status": "success",
+            "data": {
+                "answer": result["generated_text"],
+                "source": "mock_llm"
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
