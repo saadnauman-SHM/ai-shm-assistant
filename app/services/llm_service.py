@@ -9,12 +9,16 @@ logger = get_logger(__name__)
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Knowledge base (your SHM knowledge)
-documents = [
-    "SHM monitors bridges for structural damage",
-    "Sensors like accelerometers measure vibrations",
-    "Cracks in structures can indicate failure",
-    "Temperature changes affect structural integrity"
-]
+def load_documents():
+    with open("data/shm_knowledge.txt", "r", encoding="utf-8") as f:
+        text = f.read()
+    
+    # Split into chunks (by line)
+    documents = [line.strip() for line in text.split("\n") if line.strip()]
+    return documents
+
+
+documents = load_documents()
 
 # Create embeddings
 embeddings = model.encode(documents)
@@ -44,6 +48,15 @@ def query(prompt: str):
 
     logger.info(f"Retrieved results: {results}")
 
+    answer = f"""
+    Based on available SHM knowledge:
+
+    - {results[0]}
+    - {results[1]}
+
+    This suggests that structural health monitoring detects damage using sensors and structural analysis techniques.
+    """
+
     return {
-        "generated_text": " | ".join(results)
+        "generated_text": answer.strip()
     }

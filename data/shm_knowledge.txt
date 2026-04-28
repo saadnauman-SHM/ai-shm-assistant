@@ -1,0 +1,15 @@
+Structural Health Monitoring (SHM) is used to monitor the condition of structures such as bridges and buildings.
+
+SHM systems use sensors like accelerometers and strain gauges to measure vibrations and stress.
+
+Cracks and corrosion in structures are indicators of potential structural failure.
+
+Temperature changes can affect the integrity of materials and must be monitored.
+
+SHM helps in early detection of damage to prevent catastrophic failures.
+
+Bridge monitoring systems use vibration analysis to detect anomalies.
+
+Machine learning models can be used to analyze SHM data.
+
+Sensors continuously collect data for real-time structural assessment.
