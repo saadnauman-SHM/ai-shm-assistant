@@ -1,26 +1,49 @@
-def mock_response(prompt: str):
-    print("🔥 DEBUG: mock_response is running")
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from app.core.logger import get_logger
 
-    prompt_lower = prompt.lower()
+logger = get_logger(__name__)
 
-    if "bridge" in prompt_lower or "bridges" in prompt_lower:
-        answer = "In bridges, SHM helps detect cracks, vibrations, and structural damage early to prevent failures."
+# Load model once
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
-    elif "sensor" in prompt_lower or "sensors" in prompt_lower:
-        answer = "SHM systems use sensors such as accelerometers, strain gauges, and temperature sensors to monitor structural behavior."
+# Knowledge base (your SHM knowledge)
+documents = [
+    "SHM monitors bridges for structural damage",
+    "Sensors like accelerometers measure vibrations",
+    "Cracks in structures can indicate failure",
+    "Temperature changes affect structural integrity"
+]
 
-    elif "damage" in prompt_lower or "crack" in prompt_lower:
-        answer = "SHM identifies structural damage like cracks, corrosion, and fatigue before failure occurs."
+# Create embeddings
+embeddings = model.encode(documents)
+embeddings = np.array(embeddings).astype('float32')
 
-    elif "shm" in prompt_lower or "structural health monitoring" in prompt_lower:
-        answer = "Structural Health Monitoring (SHM) is a system used to monitor the condition of structures like bridges, buildings, and pipelines using sensors and data analysis."
+# Build FAISS index
+dimension = embeddings.shape[1]
+index = faiss.IndexFlatL2(dimension)
+index.add(embeddings)
 
-    else:
-        answer = "SHM is used to monitor and maintain the safety of engineering structures."
-
-    return {
-        "generated_text": f"(Smart Mock AI) {answer}"
-    }
 
 def query(prompt: str):
-    return mock_response(prompt)
+    logger.info(f"Received prompt: {prompt}")
+
+    if not prompt.strip():
+        logger.error("Empty prompt")
+        raise ValueError("Question cannot be empty")
+
+    # Convert query to embedding
+    query_vector = model.encode([prompt]).astype('float32')
+
+    # Search top 2 results
+    k = 2
+    distances, indices = index.search(query_vector, k)
+
+    results = [documents[i] for i in indices[0]]
+
+    logger.info(f"Retrieved results: {results}")
+
+    return {
+        "generated_text": " | ".join(results)
+    }
